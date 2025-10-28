@@ -1,0 +1,13 @@
+{
+  "name": "ppz-oauth-login",
+  "version": "0.0.0",
+  "description": "",
+  "type": "module",
+  "exports": {
+    ".": "./lib/mod.ts",
+    "./github": "./lib/github.ts"
+  },
+  "keywords": ["oauth", "login"],
+  "author": "PPz",
+  "license": "UNLICENSED"
+}
