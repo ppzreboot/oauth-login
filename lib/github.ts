@@ -6,7 +6,7 @@ import { OAUTH_ERROR, OAUTH_ERROR__GET_TOKEN, OAUTH_ERROR__GET_USERINFO } from '
  * Direct the user to GitHub's authorization page.
  */
 export
-function get_github_auth_code(client_id: string) {
+function get_github_login_url(client_id: string) {
     return 'https://github.com/login/oauth/authorize?client_id=' + client_id
 }
 
