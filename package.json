@@ -1,13 +1,26 @@
 {
   "name": "ppz-oauth-login",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "",
   "type": "module",
   "exports": {
-    ".": "./lib/mod.ts",
-    "./github": "./lib/github.ts"
+    ".": "./dist/mod.js",
+    "./github": "./dist/github.js"
   },
-  "keywords": ["oauth", "login"],
+  "files": [
+    "dist",
+    "readme.md"
+  ],
+  "keywords": [
+    "oauth",
+    "login"
+  ],
+  "scripts": {
+    "build": "tsc --build"
+  },
   "author": "PPz",
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
 }
