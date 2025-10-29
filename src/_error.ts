@@ -1,7 +1,10 @@
 export
 enum OAUTH_ERROR__GET_TOKEN {
-    invalid_code = 1,
+    empty_code = 1,
+    invalid_code,
+    incorrect_client_credentials,
     got_invalid_token,
+    unknown,
 }
 
 export

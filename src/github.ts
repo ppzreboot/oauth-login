@@ -43,7 +43,8 @@ async function get_token_by_code(code: string, client_id: string, client_secret:
 }
 
 interface I_github_userinfo extends I_userinfo {
-
+    name: string
+    email: string
 }
 
 /**
@@ -64,7 +65,9 @@ async function get_userinfo_by_token(access_token: string):
     console.log('github userinfo response:')
     console.log(data)
     return [0, {
-        id: data.id,
+        id: data.id + '',
+        name: data.login,
+        email: data.email,
     }]
 }
 
