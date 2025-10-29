@@ -10,6 +10,7 @@ enum OAUTH_ERROR__GET_TOKEN {
 export
 enum OAUTH_ERROR__GET_USERINFO {
     invalid_token = 1001,
+    unknown,
 }
 
 export

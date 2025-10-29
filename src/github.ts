@@ -1,5 +1,6 @@
 import type { I_userinfo } from './_type'
 import { OAUTH_ERROR, OAUTH_ERROR__GET_TOKEN, OAUTH_ERROR__GET_USERINFO } from './_error'
+import { is_real_str } from './_utils'
 
 /**
  * Step 1
@@ -20,7 +21,7 @@ async function get_token_by_code(code: string, client_id: string, client_secret:
     Promise<[OAUTH_ERROR__GET_TOKEN, null] | [0, string]>
 {
     if (code.length === 0)
-        return [OAUTH_ERROR__GET_TOKEN.invalid_code, null]
+        return [OAUTH_ERROR__GET_TOKEN.empty_code, null]
     const response = await fetch('https://github.com/login/oauth/access_token', {
         method: 'POST',
         headers: {
@@ -34,12 +35,22 @@ async function get_token_by_code(code: string, client_id: string, client_secret:
         }),
     })
     const data = await response.json()
-    console.log('github access token response:')
-    console.log(data)
-    const access_token = data.access_token
-    if (typeof(access_token) === 'string')
-        return [0, access_token]
-    return [OAUTH_ERROR__GET_TOKEN.got_invalid_token, null]
+    switch (data.error) {
+        case 'bad_verification_code':
+            return [OAUTH_ERROR__GET_TOKEN.invalid_code, null]
+        case 'incorrect_client_credentials':
+            return [OAUTH_ERROR__GET_TOKEN.incorrect_client_credentials, null]
+        case undefined: {
+            const access_token = data.access_token
+            if (typeof(access_token) === 'string')
+                return [0, access_token]
+            return [OAUTH_ERROR__GET_TOKEN.got_invalid_token, null]
+        }
+        default:
+            console.error('Unexpected error from github get_token_by_code:')
+            console.error(data)
+            throw [OAUTH_ERROR__GET_TOKEN.unknown, null]
+    }
 }
 
 interface I_github_userinfo extends I_userinfo {
@@ -62,13 +73,21 @@ async function get_userinfo_by_token(access_token: string):
         },
     })
     const data = await response.json()
-    console.log('github userinfo response:')
-    console.log(data)
-    return [0, {
-        id: data.id + '',
-        name: data.login,
-        email: data.email,
-    }]
+    switch (data.message) {
+        case 'Bad credentials':
+            return [OAUTH_ERROR__GET_USERINFO.invalid_token, null]
+        case undefined: {
+            const id = data.id + ''
+            const name = data.login
+            const email = data.email
+            if (is_real_str(id) && is_real_str(name) && is_real_str(email))
+                return [0, { id, name, email }]
+        }
+        default:
+            console.error('Unexpected error from github get_userinfo_by_token:')
+            console.error(data)
+            return [OAUTH_ERROR__GET_USERINFO.unknown, null]
+    }
 }
 
 /**
