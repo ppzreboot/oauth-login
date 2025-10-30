@@ -1,0 +1,9 @@
+{
+    "name": "@ppz/oauth-login",
+    "version": "0.0.5",
+    "license": "UNLICENSED",
+    "exports": {
+        ".": "./lib/mod.ts",
+        "./github": "./lib/github.ts"
+    }
+}

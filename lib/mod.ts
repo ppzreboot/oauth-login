@@ -1,2 +1,2 @@
-export * from './_error'
-export type * from './_type'
+export * from './_error.ts'
+export type * from './_type.ts'

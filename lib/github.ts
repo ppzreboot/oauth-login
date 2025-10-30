@@ -1,13 +1,13 @@
-import type { I_userinfo } from './_type'
-import { OAUTH_ERROR, OAUTH_ERROR__GET_TOKEN, OAUTH_ERROR__GET_USERINFO } from './_error'
-import { is_real_str } from './_utils'
+import type { I_userinfo } from './_type.ts'
+import { type OAUTH_ERROR, OAUTH_ERROR__GET_TOKEN, OAUTH_ERROR__GET_USERINFO } from './_error.ts'
+import { is_real_str } from './_utils.ts'
 
 /**
  * Step 1
  * Direct the user to GitHub's authorization page.
  */
 export
-function get_github_login_url(client_id: string) {
+function get_github_login_url(client_id: string): string {
     return 'https://github.com/login/oauth/authorize?client_id=' + client_id
 }
 
