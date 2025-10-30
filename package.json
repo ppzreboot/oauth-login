@@ -1,14 +1,21 @@
 {
   "name": "ppz-oauth-login",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "",
   "type": "module",
   "exports": {
-    ".": "./dist/mod.js",
-    "./github": "./dist/github.js"
+    ".": {
+      "import": "./dist/mod.js",
+      "deno": "./src/mod.ts"
+    },
+    "./github": {
+      "import": "./dist/github.js",
+      "deno": "./src/github.ts"
+    }
   },
   "files": [
     "dist",
+    "src",
     "readme.md"
   ],
   "keywords": [

@@ -7,7 +7,7 @@
     "outDir": "dist",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "skipLibCheck": true
   },
   "include": ["src"]
