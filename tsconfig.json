@@ -10,5 +10,5 @@
     "moduleResolution": "bundler",
     "skipLibCheck": true
   },
-  "include": ["src"]
+  "include": ["lib"]
 }
