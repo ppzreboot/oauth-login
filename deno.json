@@ -1,6 +1,6 @@
 {
     "name": "@ppz/oauth-login",
-    "version": "0.0.6",
+    "version": "0.1.0",
     "license": "UNLICENSED",
     "exports": {
         ".": "./lib/mod.ts",

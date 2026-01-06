@@ -53,18 +53,13 @@ async function get_token_by_code(code: string, client_id: string, client_secret:
     }
 }
 
-interface I_github_userinfo extends I_userinfo {
-    name: string
-    email: string
-}
-
 /**
  * Step 2.2
  * Use the access token to get the user's information.
  */
 export
 async function get_userinfo_by_token(access_token: string):
-    Promise<[OAUTH_ERROR__GET_USERINFO, null] | [0, I_github_userinfo]>
+    Promise<[OAUTH_ERROR__GET_USERINFO, null] | [0, I_userinfo]>
 {
     const response = await fetch('https://api.github.com/user', {
         method: 'GET',
@@ -77,10 +72,9 @@ async function get_userinfo_by_token(access_token: string):
         return [OAUTH_ERROR__GET_USERINFO.invalid_token, null]
     if (data.message === undefined) {
         const id = data.id + ''
-        const name = data.login
         const email = data.email
-        if (is_real_str(id) && is_real_str(name) && is_real_str(email))
-            return [0, { id, name, email }]
+        if (is_real_str(id) && (email === undefined || is_real_str(email)))
+            return [0, { id, email }]
     }
     console.error('Unexpected error from github get_userinfo_by_token:')
     console.error(data)
@@ -94,7 +88,7 @@ async function get_userinfo_by_token(access_token: string):
  */
 export
 async function get_userinfo_by_code(code: string, client_id: string, client_secret: string):
-    Promise<[OAUTH_ERROR, null] | [0, I_github_userinfo]>
+    Promise<[OAUTH_ERROR, null] | [0, I_userinfo]>
 {
     const [err, token] = await get_token_by_code(code, client_id, client_secret)
     if (err !== 0)
