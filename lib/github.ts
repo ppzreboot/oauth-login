@@ -70,12 +70,14 @@ async function get_userinfo_by_token(access_token: string):
     const data = await response.json()
     if (data.message === 'Bad credentials')
         return [OAUTH_ERROR__GET_USERINFO.invalid_token, null]
-    if (data.message === undefined) {
-        const id = data.id + ''
-        const email = data.email
-        if (is_real_str(id) && (email === undefined || is_real_str(email)))
-            return [0, { id, email }]
-    }
+    if (data.message === undefined
+        && typeof(data.id) === 'number'
+        && (data.email === null || is_real_str(data.email))
+    )
+        return [0, {
+            id: data.id + '',
+            email: data.email,
+        }]
     console.error('Unexpected error from github get_userinfo_by_token:')
     console.error(data)
     return [OAUTH_ERROR__GET_USERINFO.unknown, null]
