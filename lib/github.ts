@@ -1,99 +1,96 @@
-import type { I_userinfo } from './_type.ts'
-import { type OAUTH_ERROR, OAUTH_ERROR__GET_TOKEN, OAUTH_ERROR__GET_USERINFO } from './_error.ts'
-import { is_real_str } from './_utils.ts'
+import type { I_oauth_error__get_token, I_oauth_error__get_id, I_oauth_error } from './type.ts'
+import {
+	retrieve_json_body,
+	is_real_str,
+	type I_async_result,
+	type I_result_error_with_key,
+	error_result,
+} from './ppz/index.ts'
 
-/**
- * Step 1
- * Direct the user to GitHub's authorization page.
- */
+/** GitHub's authorization page. */
 export
 function get_github_login_url(client_id: string): string {
-    return 'https://github.com/login/oauth/authorize?client_id=' + client_id
+	return 'https://github.com/login/oauth/authorize?client_id=' + client_id
 }
 
-/**
- * ## Step 2.1
- * Exchange the authorization code for an access token.
- * This step is "Your APP(client id + client secret) use the user's identity(auth code) to login to Github".
- */
+/** Exchange access token with authorization code. */
 export
-async function get_token_by_code(code: string, client_id: string, client_secret: string):
-    Promise<[OAUTH_ERROR__GET_TOKEN, null] | [0, string]>
+async function get_token_by_code(code: string, client_id: string, client_secret: string): I_async_result<string, I_result_error_with_key<I_oauth_error__get_token>>
 {
-    if (code.length === 0)
-        return [OAUTH_ERROR__GET_TOKEN.empty_code, null]
-    const response = await fetch('https://github.com/login/oauth/access_token', {
-        method: 'POST',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            client_id,
-            client_secret,
-            code,
-        }),
-    })
-    const data = await response.json()
-    switch (data.error) {
-        case 'bad_verification_code':
-            return [OAUTH_ERROR__GET_TOKEN.invalid_code, null]
-        case 'incorrect_client_credentials':
-            return [OAUTH_ERROR__GET_TOKEN.incorrect_client_credentials, null]
-        case undefined: {
-            const access_token = data.access_token
-            if (typeof(access_token) === 'string')
-                return [0, access_token]
-            return [OAUTH_ERROR__GET_TOKEN.got_invalid_token, null]
-        }
-        default:
-            console.error('Unexpected error from github get_token_by_code:')
-            console.error(data)
-            throw [OAUTH_ERROR__GET_TOKEN.unknown, null]
-    }
+	if (code.length === 0)
+		return error_result('empty code', null)
+
+	const response = await fetch('https://github.com/login/oauth/access_token', {
+		method: 'POST',
+		headers: {
+			'Accept': 'application/json',
+			'Content-Type': 'application/json',
+		},
+		body: JSON.stringify({
+			client_id,
+			client_secret,
+			code,
+		}),
+	})
+	const response_result = await retrieve_json_body(response)
+	if (response_result.ok === false) {
+		if (response_result.error.key === 'connection error')
+			return error_result('connection error', response_result.error.error)
+		else
+			return error_result('invalid response from oauth provider', response_result.error.error)
+	}
+
+	const data = response_result.value as { error?: string, access_token?: unknown }
+
+	switch (data.error) {
+		case 'bad_verification_code':
+			return error_result('invalid code', data)
+		case 'incorrect_client_credentials':
+			return error_result('incorrect client credentials', data)
+		case undefined: {
+			const access_token = data.access_token
+			if (is_real_str(access_token))
+				return { ok: true, value: access_token }
+			return error_result('invalid response from oauth provider', data)
+		}
+		default:
+			return error_result('invalid response from oauth provider', data)
+	}
 }
 
-/**
- * Step 2.2
- * Use the access token to get the user's information.
- */
+/** Exchange userid with access token . */
 export
-async function get_userinfo_by_token(access_token: string):
-    Promise<[OAUTH_ERROR__GET_USERINFO, null] | [0, I_userinfo]>
+async function get_userid_by_token(access_token: string):
+	I_async_result<number, I_result_error_with_key<I_oauth_error__get_id>>
 {
-    const response = await fetch('https://api.github.com/user', {
-        method: 'GET',
-        headers: {
-            Authorization: 'Bearer ' + access_token,
-        },
-    })
-    const data = await response.json()
-    if (data.message === 'Bad credentials')
-        return [OAUTH_ERROR__GET_USERINFO.invalid_token, null]
-    if (data.message === undefined
-        && typeof(data.id) === 'number'
-        && (data.email === null || is_real_str(data.email))
-    )
-        return [0, {
-            id: data.id + '',
-            email: data.email,
-        }]
-    console.error('Unexpected error from github get_userinfo_by_token:')
-    console.error(data)
-    return [OAUTH_ERROR__GET_USERINFO.unknown, null]
+	const response = await fetch('https://api.github.com/user', {
+		method: 'GET',
+		headers: {
+			Authorization: 'Bearer ' + access_token,
+		},
+	})
+	const response_result = await retrieve_json_body(response)
+	if (response_result.ok === false) {
+		if (response_result.error.key === 'connection error')
+			return error_result('connection error', response_result.error.error)
+		else
+			return error_result('invalid response from oauth provider', response_result.error.error)
+	}
+	const data = response_result.value as { message?: string, id?: unknown }
+	if (data.message === 'Bad credentials')
+		return error_result('invalid token', data)
+	if (data.message === undefined && typeof(data.id) === 'number')
+		return { ok: true, value: data.id }
+	return error_result('invalid response from oauth provider', data)
 }
 
-/**
- * Step 2
- * Exchange the authorization code for an access token,
- * then use the access token to get the user's information.
- */
+/** Exchange userid with authentication code. */
 export
 async function get_userinfo_by_code(code: string, client_id: string, client_secret: string):
-    Promise<[OAUTH_ERROR, null] | [0, I_userinfo]>
+	I_async_result<number, I_result_error_with_key<I_oauth_error>>
 {
-    const [err, token] = await get_token_by_code(code, client_id, client_secret)
-    if (err !== 0)
-        return [err, null]
-    return await get_userinfo_by_token(token)
+	const result = await get_token_by_code(code, client_id, client_secret)
+	if (result.ok === false)
+		return result
+	return await get_userid_by_token(result.value)
 }
