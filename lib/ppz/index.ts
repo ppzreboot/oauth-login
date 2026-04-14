@@ -30,7 +30,6 @@ async function dont_throw_async<T>(job: () => Promise<T>): I_async_result<T, unk
 	}
 }
 
-
 type I_json_value =
 	| string
 	| number
@@ -42,27 +41,19 @@ type I_json_obj = { [key: string]: I_json_value }
 type I_json_array = I_json_value[]
 
 export
-type I_error_key__retrieve_json_body
-	= 'connection error'
-	| 'invalid json'
-	| 'primitive json'
+type I_error_key__retrieve_json_body = 'invalid json' | 'primitive json'
 
 export
-async function retrieve_json_body(response: Response):
-	I_async_result<I_json_obj | I_json_array, I_result_error_with_key<I_error_key__retrieve_json_body>> {
-	let body_str: string
-	try {
-		body_str = await response.text()
-	} catch (error) {
-		return error_result('connection error', error)
-	}
+function parse_json(json: string):
+	I_result<I_json_obj | I_json_array, I_result_error_with_key<I_error_key__retrieve_json_body>>
+{
 	let body: I_json_value
 	try {
-		body = JSON.parse(body_str)
+		body = JSON.parse(json)
 	} catch (error) {
 		return error_result('invalid json', error)
 	}
-	if (typeof(body) !== 'object' || body === null)
+	if (body === null || typeof(body) !== 'object')
 		return error_result('primitive json', null)
 	return { ok: true, value: body }
 }
