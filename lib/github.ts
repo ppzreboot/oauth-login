@@ -18,7 +18,7 @@ export
 async function get_token_by_code(code: string, client_id: string, client_secret: string): I_async_result<string, I_result_error_with_key<I_oauth_error__get_token>>
 {
 	if (code.length === 0)
-		return error_result('empty code', null)
+		return error_result('empty auth code', null)
 
 	let response: Response
 	let http_body: string
@@ -36,6 +36,7 @@ async function get_token_by_code(code: string, client_id: string, client_secret:
 			}),
 		})
 		http_body = await response.text()
+		// console.log(response.status, http_body)
 	} catch (error) {
 		return error_result('connection error', error)
 	}
@@ -48,13 +49,15 @@ async function get_token_by_code(code: string, client_id: string, client_secret:
 
 		switch (data.error) { // 已知异常
 			case 'bad_verification_code':
-				return error_result('invalid code', data)
+				return error_result('invalid auth code', data)
 			case 'incorrect_client_credentials':
-				return error_result('incorrect client credentials', data)
+				return error_result('incorrect client secret', data)
+			case 'Not Found':
+				if (response.status === 404)
+					return error_result('maybe incorrect client id', data)
 		}
 	}
 	// 未知异常
-	// 验证“异常 client id”
 	return error_result('unknown error', {
 		http_code: response.status,
 		http_body,
@@ -96,7 +99,7 @@ async function get_userid_by_token(access_token: string):
 
 /** Exchange userid with authentication code. */
 export
-async function get_userinfo_by_code(code: string, client_id: string, client_secret: string):
+async function get_userid_by_code(code: string, client_id: string, client_secret: string):
 	I_async_result<number, I_result_error_with_key<I_oauth_error>>
 {
 	const result = await get_token_by_code(code, client_id, client_secret)

@@ -1,9 +1,10 @@
 export
 type I_oauth_error__get_token
-	= 'empty code'
+	= 'empty auth code'
 	| 'connection error'
-	| 'invalid code'
-	| 'incorrect client credentials'
+	| 'invalid auth code'
+	| 'maybe incorrect client id'
+	| 'incorrect client secret'
 	| 'unknown error'
 
 export
