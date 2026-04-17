@@ -1,6 +1,8 @@
 export
+type I_oauth_error__get_token__callback_opts = 'empty auth code' | 'CSRF attack'
+export
 type I_oauth_error__get_token
-	= 'empty auth code'
+	= I_oauth_error__get_token__callback_opts
 	| 'connection error'
 	| 'invalid auth code'
 	| 'maybe incorrect client id'
@@ -15,3 +17,14 @@ type I_oauth_error__get_id
 
 export
 type I_oauth_error = I_oauth_error__get_token | I_oauth_error__get_id
+
+export
+interface I_callback_opts {
+	auth_code: string
+	redirect_uri: string
+	state: {
+		from_url: string
+		from_session: string
+	}
+	challenge_verifier: string
+}
