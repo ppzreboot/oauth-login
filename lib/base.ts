@@ -10,6 +10,7 @@ import type {
 	I_oauth_error__get_id,
 	I_oauth_error,
 	I_callback_opts,
+	I_oauth_prep,
 } from './type.ts'
 
 export
@@ -42,7 +43,7 @@ abstract class OAuth {
 	}
 
 	/** Prepare the oauth process. */
-	async prepare_oauth() {
+	async prepare_oauth(): Promise<I_oauth_prep> {
 		const state = this.generate_random_byte(16)
 		const challenge_verifier = this.generate_random_byte(32)
 		const challenge = await this.generate_challenge(challenge_verifier)

@@ -38,3 +38,11 @@ interface I_callback_opts {
 		from_session?: string
 	}
 }
+
+/** Prepare the oauth process. */
+export
+interface I_oauth_prep {
+	url: URL
+	state: string
+	challenge_verifier: string
+}
