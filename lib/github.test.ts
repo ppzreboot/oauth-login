@@ -16,10 +16,6 @@ Deno.test('GitHub OAuth', async t => {
 		await t.step('default redirect_uri', () => {
 			assertEquals(oauth_prep.url.searchParams.get('redirect_uri'), redirect_uri)
 		})
-		await t.step('custom redirect_uri', async () => {
-			const oauth_prep = await github_oauth.prepare_oauth('http://localhost/')
-			assertEquals(oauth_prep.url.searchParams.get('redirect_uri'), 'http://localhost/')
-		})
 		await t.step('state', () => {
 			assertEquals(oauth_prep.state.length, 22) // 16 bytes => 128 bits => 128 / 6 = 21.3333 => 22 base64
 		})
@@ -35,7 +31,6 @@ Deno.test('GitHub OAuth', async t => {
 			await t.step('empty auth code', async () => {
 				const result = await github_oauth.get_userid_by_code({
 					auth_code: '',
-					redirect_uri: '',
 					state: {
 						from_url: '123',
 						from_session: '123',
@@ -49,7 +44,6 @@ Deno.test('GitHub OAuth', async t => {
 				await t.step('empty state', async () => {
 					const result = await github_oauth.get_userid_by_code({
 						auth_code: 'code',
-						redirect_uri: '',
 						state: { from_url: '', from_session: '' },
 						challenge_verifier: '',
 					})
@@ -59,7 +53,6 @@ Deno.test('GitHub OAuth', async t => {
 				await t.step('different state', async () => {
 					const result = await github_oauth.get_userid_by_code({
 						auth_code: 'code',
-						redirect_uri: '',
 						state: {
 							from_url: 'abc',
 							from_session: 'def',
@@ -74,9 +67,8 @@ Deno.test('GitHub OAuth', async t => {
 		await t.step('error: bad auth code', async () => {
 			const result = await github_oauth.get_userid_by_code({
 				auth_code: 'bad code',
-				redirect_uri: '',
 				state: { from_url: '123', from_session: '123' },
-				challenge_verifier: '',
+				challenge_verifier: '123',
 			})
 			assert(result.ok === false)
 			assert(result.error.key === 'invalid auth code')
@@ -85,9 +77,8 @@ Deno.test('GitHub OAuth', async t => {
 			const github_oauth = new GitHubOAuth('bad-id', 'bad-secret', 'http://localhost/')
 			const result = await github_oauth.get_userid_by_code({
 				auth_code: 'code',
-				redirect_uri: '',
 				state: { from_url: '123', from_session: '123' },
-				challenge_verifier: '',
+				challenge_verifier: '123',
 			})
 			assert(result.ok === false)
 			assertEquals(result.error.key, 'maybe incorrect client id')
@@ -96,9 +87,8 @@ Deno.test('GitHub OAuth', async t => {
 			const github_oauth = new GitHubOAuth(client_id, 'bad-secret', 'http://localhost/')
 			const result = await github_oauth.get_userid_by_code({
 				auth_code: 'code',
-				redirect_uri: '',
 				state: { from_url: '123', from_session: '123' },
-				challenge_verifier: '',
+				challenge_verifier: '123',
 			})
 			assert(result.ok === false)
 			assertEquals(result.error.key, 'incorrect client secret')

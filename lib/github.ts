@@ -38,7 +38,7 @@ class GitHubOAuth extends OAuth {
 					client_id: this.client_id,
 					client_secret: this.client_secret,
 					code: opts.auth_code,
-					redirect_uri: opts.redirect_uri,
+					redirect_uri: this.redirect_uri,
 					code_verifier: opts.challenge_verifier,
 				}),
 			})

@@ -17,7 +17,7 @@ abstract class OAuth {
 	protected constructor(
 		protected readonly client_id: string,
 		protected readonly client_secret: string,
-		private readonly redirect_uri: string,
+		protected readonly redirect_uri: string,
 		private readonly auth_url: string,
 	) {}
 
@@ -42,13 +42,13 @@ abstract class OAuth {
 	}
 
 	/** Prepare the oauth process. */
-	async prepare_oauth(redirect_uri: string = this.redirect_uri) {
+	async prepare_oauth() {
 		const state = this.generate_random_byte(16)
 		const challenge_verifier = this.generate_random_byte(32)
 		const challenge = await this.generate_challenge(challenge_verifier)
 		const url = new URL(this.auth_url)
 		url.searchParams.set('client_id', this.client_id)
-		url.searchParams.set('redirect_uri', redirect_uri)
+		url.searchParams.set('redirect_uri', this.redirect_uri)
 		url.searchParams.set('state', state)
 		url.searchParams.set('code_challenge', challenge)
 		url.searchParams.set('code_challenge_method', 'S256')
@@ -63,10 +63,12 @@ abstract class OAuth {
 	protected check_callback_opts(opts: I_callback_opts):
 		I_result<null, I_result_error_with_key<I_oauth_error__get_token__callback_opts>>
 	{
-		if (opts.auth_code.length === 0)
+		if (opts.auth_code === null || opts.auth_code.length === 0)
 			return error_result('empty auth code', null)
-		if (opts.state.from_session.length === 0 || opts.state.from_url !== opts.state.from_session)
+		if (opts.state.from_session === undefined || opts.state.from_session.length === 0 || opts.state.from_url !== opts.state.from_session)
 			return error_result('CSRF attack', null)
+		if (!opts.challenge_verifier)
+			return error_result('empty challenge verifier', null)
 		return { ok: true, value: null }
 	}
 
