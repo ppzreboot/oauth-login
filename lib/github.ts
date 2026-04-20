@@ -4,7 +4,7 @@ import {
 	type I_async_result,
 	type I_result_error_with_key,
 	error_result,
-} from './ppz/index.ts'
+} from '@ppz/ppz'
 import type {
 	I_oauth_error__get_token,
 	I_oauth_error__get_id,
