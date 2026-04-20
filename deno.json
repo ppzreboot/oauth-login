@@ -10,7 +10,7 @@
 		".": "./lib/mod.ts"
 	},
 	"imports": {
-		"@ppz/ppz": "jsr:@ppz/ppz@^0.0.1",
+		"@ppz/ppz": "jsr:@ppz/ppz@^0.0.2",
 		"@std/assert": "jsr:@std/assert@^1.0.19",
 		"@std/http": "jsr:@std/http@^1.0.25"
 	}
