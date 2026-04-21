@@ -1,3 +1,4 @@
+import { encodeBase64Url } from '@std/encoding'
 import {
 	type I_result,
 	type I_async_result,
@@ -22,24 +23,16 @@ abstract class OAuth {
 		private readonly auth_url: string,
 	) {}
 
-	private uint8_array_to_base64(array: Uint8Array) {
-		const random_str = String.fromCharCode(...array) // 转换为 ASCII 字符串 (每个 ASCII 就是一个 byte)
-		const challenge = btoa(random_str) // len 个 byte => len * 8 bit => len * 8 / 6 个 base64 (每个 base64 == 6 bit)
-		return challenge
-			.replace(/\+/g, '-') // 替换“属于 base64”但不适用于 URL 的字符
-			.replace(/\//g, '_')
-			.replace(/=+$/, '')
-	}
 	private generate_random_byte(len: number) {
-		const random = new Uint8Array(len)
-		crypto.getRandomValues(random) // 生成 len 字节的数据
-		return this.uint8_array_to_base64(random)
+		const random = new Uint8Array(len) // 生成 len 字节的容器
+		crypto.getRandomValues(random) // 生成 len 字节的随机数据
+		return encodeBase64Url(random) // 转化成 url 安全的字符串
 	}
 
 	private async generate_challenge(verifier: string) {
-		const v = new TextEncoder().encode(verifier)
-		const hash = await crypto.subtle.digest('SHA-256', v)
-		return this.uint8_array_to_base64(new Uint8Array(hash))
+		const v = new TextEncoder().encode(verifier) // string -> binary
+		const hash = await crypto.subtle.digest('SHA-256', v) // hash(binary)
+		return encodeBase64Url(hash) // hashed_binary -> base64url
 	}
 
 	/** Prepare the oauth process. */
