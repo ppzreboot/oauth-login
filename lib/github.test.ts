@@ -6,7 +6,7 @@ const client_secret = Deno.env.get('github_client_secret')
 const redirect_uri = Deno.env.get('github_redirect_uri')
 
 if (!client_id || !client_secret || !redirect_uri)
-	throw new Error('github_client_id and github_client_secret must be set')
+	throw new Error('github_client_id and github_client_secret and github_redirect_uri must be set')
 
 const github_oauth = new GitHubOAuth(client_id, client_secret, redirect_uri)
 

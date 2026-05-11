@@ -72,7 +72,7 @@ abstract class OAuth {
 	/** Exchange userid with access token . */
 	abstract get_userid_by_token(access_token: string):
 		I_async_result<number, I_result_error_with_key<I_oauth_error__get_id>>
-	/** Exchange userid with authentication code. */
+	/** Exchange userid with authorization code. */
 	abstract get_userid_by_code(opts: I_callback_opts):
 		I_async_result<number, I_result_error_with_key<I_oauth_error>>
 }
