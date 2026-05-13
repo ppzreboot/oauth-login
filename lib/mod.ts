@@ -1,2 +1,2 @@
 export type * from './type.ts'
-export * as github from './github.ts'
+export * from './github.ts'

@@ -1,5 +1,5 @@
 import { getCookies, setCookie } from '@std/http/cookie'
-import { GitHubOAuth } from '../lib/github.ts'
+import { GitHubOAuth } from '@ppz/oauth-login'
 
 const client_id = Deno.env.get('github_client_id')
 const client_secret = Deno.env.get('github_client_secret')
@@ -57,6 +57,7 @@ async function handler(req: Request): Promise<Response> {
 			return page_html(userid)
 		}
 		case '/login': {
+			console.log('logging in')
 			const oauth_prep = await oauth.prepare_oauth()
 			const response = new Response(null, {
 				status: 302,
@@ -69,6 +70,7 @@ async function handler(req: Request): Promise<Response> {
 			return response
 		}
 		case '/oauth/callback/github': {
+			console.log('callbacking')
 			const result = await oauth.get_userid_by_code({
 				auth_code: url.searchParams.get('code'),
 				challenge_verifier: get_cookies(req.headers)[oauth_challenge_verifier_key],
