@@ -1,6 +1,6 @@
 {
 	"name": "@ppz/oauth-login",
-	"version": "0.3.1",
+	"version": "0.3.2",
 	"license": "Unlicense",
 	"tasks": {
 		"test": "deno test --env-file --allow-env --allow-net",
